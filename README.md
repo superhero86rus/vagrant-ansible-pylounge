@@ -42,3 +42,19 @@ end
 ```bash
  vagrant box add --name bento_ubuntu-20.04 "~/Documents/images/vagrant/bento_ubuntu -20.04.box"
 ```
+
+##### Установка имени хоста, чтобы понимать на какой мы машине (по SSH)
+```bash
+hostnamectl set-hostname node1.linux.local
+```
+
+##### Нужно обязательно добавить параметры SSH в hosts-файл
+```ini
+[webservers]
+192.168.56.100 ansible_ssh_user=ansible ansible_ssh_pass=ansible
+```
+
+##### Самая простая проверка Ansible
+```bash
+ansible all -m ping -i ./ansible/hosts
+```
