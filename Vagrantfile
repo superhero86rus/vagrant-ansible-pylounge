@@ -28,34 +28,36 @@ Vagrant.configure("2") do |config|
   config.vm.network "private_network", ip: "192.168.56.100"
 
   # Правим /etc/sudoers чтобы не требовать пароль от УЗ ansible
-  $script = <<-SCRIPT
-    groupadd -f ansible
-    useradd -m -p $(perl -e 'print crypt($ARGV[0], "password")' 'ansible') ansible -d /home/ansible -m -g ansible -s /bin/bash
-    sudo chown -R ansible:ansible /home/ansible
-    touch /etc/sudoers.d/ansible
-    echo "ansible  ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ansible
-    sudo chown -R ansible:ansible /home/ansible
-    mkdir -p "/home/ansible/.ssh"
-    sudo chown -R ansible:ansible "/home/ansible/.ssh"
-    cp -rT /etc/skel /home/ansible
-  SCRIPT
+  # $script = <<-SCRIPT
+  #   groupadd -f ansible
+  #   useradd -m -p $(perl -e 'print crypt($ARGV[0], "password")' 'ansible') ansible -d /home/ansible -m -g ansible -s /bin/bash
+  #   touch /etc/sudoers.d/ansible
+  #   echo "ansible  ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ansible
+  #   chown -R ansible:ansible /home/ansible
+  #   mkdir -p "/home/ansible/.ssh"
+  #   chown -R ansible:ansible "/home/ansible/.ssh"
+  #   cp -rT /etc/skel /home/ansible
+  # SCRIPT
 
   # Команда, которая вызовет на машине Shell инструкцию
-  config.vm.define "app" do |app|
+  # config.vm.define "app" do |app|
     # app.vm.provision "shell", inline: "uname -a"
-    app.vm.provision "shell", inline: $script
-  end
+    # app.vm.provision "shell", inline: $script
+  # end
 
   # Команда, которая вызовет на машине Shell с инструкциями внешнего файла
-  # config.vm.provision "shell", path: "provision.sh"
+  # Установка и настройка nginx
+  config.vm.provision "shell", path: "provision.sh"
 
   # Копируем ключи на гостевую машину
-  config.vm.provision "file", source: "/home/ansible/.ssh/id_rsa.pub", destination: "/home/ansible/.ssh/id_rsa.pub"
+  # config.vm.provision "file", source: "/home/ansible/.ssh/id_rsa.pub", destination: "/home/ansible/.ssh/id_rsa.pub"
 
   # Команда, которая выполнится после создания машины и вызовет Ansible
-  #config.vm.provision "ansible" do |ansible|
-  #  ansible.playbook = "playbook.yml"
-  #  ansible.become = true
-  #  ansible.become_user = "root"
-  #end
+  config.vm.provision "ansible" do |ansible|
+    ansible.inventory_path = "./ansible/hosts"
+    ansible.playbook = "./ansible/service.yml"
+    ansible.become = true
+    # ansible.become_user = "root"
+    ansible.limit = "all"
+  end
 end

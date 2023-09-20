@@ -51,4 +51,5 @@ EOF
 
 ln -s /etc/nginx/sites-available/newapp /etc/nginx/sites-enabled/newapp 
 
-service nginx restart
+# Replaced by ansible playbook
+# service nginx restart
